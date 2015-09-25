@@ -1,0 +1,4 @@
+
+swift_username: "vagrant"
+swift_group: "vagrant"
+source_dir: "/vagrant/source"
