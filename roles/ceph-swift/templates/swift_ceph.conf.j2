@@ -1,0 +1,20 @@
+[DEFAULT]
+devices = /srv/5/node
+mount_check = false
+bind_port = 6050
+max_clients = 1024
+workers = 1
+disable_fallocate = true
+rados_user = admin
+rados_pool = test
+rados_ceph_conf = /etc/ceph/ceph.conf
+
+[pipeline:main]
+pipeline = recon object-server
+
+[app:object-server]
+use = egg:swift_ceph_backend#rados_object
+user = {{ swift_username }}
+
+[filter:recon]
+use = egg:swift#recon

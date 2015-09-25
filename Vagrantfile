@@ -12,6 +12,7 @@ NOSDS      = settings['osd_vms']
 NMDSS      = settings['mds_vms']
 NRGWS      = settings['rgw_vms']
 CLIENTS    = settings['client_vms']
+SWIFT      = settings['swift_proxy']
 SUBNET     = settings['subnet']
 BOX        = settings['vagrant_box']
 MEMORY     = settings['memory']
@@ -28,6 +29,7 @@ ansible_provision = proc do |ansible|
     'osds'        => (0..NOSDS - 1).map { |j| "osd#{j}" },
     'mdss'        => (0..NMDSS - 1).map { |j| "mds#{j}" },
     'rgws'        => (0..NRGWS - 1).map { |j| "rgw#{j}" },
+    'swift'       => (0..SWIFT - 1).map { |j| "swift#{j}" },
     'clients'     => (0..CLIENTS - 1).map { |j| "client#{j}" }
   }
 
@@ -38,7 +40,7 @@ ansible_provision = proc do |ansible|
     fsid: '4a158d27-f750-41d5-9e7f-26ce4c9d2d45',
     monitor_secret: 'AQAWqilTCDh7CBAAawXt6kyTgLFCxSvJhTEmuw==',
     journal_size: 100,
-    monitor_interface: 'eth1',
+    monitor_interface: 'enp0s8',
     cluster_network: "#{SUBNET}.0/24",
     public_network: "#{SUBNET}.0/24",
     devices: "[ '/dev/sdb', '/dev/sdc' ]",
@@ -78,6 +80,19 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.customize ['modifyvm', :id, '--memory', "#{MEMORY}"]
       end
       rgw.vm.provider :vmware_fusion do |v|
+        v.vmx['memsize'] = "#{MEMORY}"
+      end
+    end
+  end
+
+  (0..SWIFT - 1).each do |i|
+    config.vm.define "swift#{i}" do |swift|
+      swift.vm.hostname = "ceph-swift#{i}"
+      swift.vm.network :private_network, ip: "#{SUBNET}.5#{i}"
+      swift.vm.provider :virtualbox do |vb|
+        vb.customize ['modifyvm', :id, '--memory', "#{MEMORY}"]
+      end
+      swift.vm.provider :vmware_fusion do |v|
         v.vmx['memsize'] = "#{MEMORY}"
       end
     end
