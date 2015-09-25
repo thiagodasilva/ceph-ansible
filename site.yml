@@ -22,3 +22,8 @@
   sudo: True
   roles:
   - ceph-rgw
+
+- hosts: swift
+  sudo: True
+  roles:
+  - ceph-swift
